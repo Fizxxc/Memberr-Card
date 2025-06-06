@@ -1,50 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Admin Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
+
 <body>
-  <div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center">
     <h2>Dashboard Admin</h2>
+    <button id="scan-rfid-btn" class="btn btn-primary">🔍 Scan Member via RFID</button>
     <div id="user-list" class="mt-4"></div>
   </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-  import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-  import { firebaseConfig } from './firebaseConfig.js';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+    import { firebaseConfig } from './firebaseConfig.js';
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
-  const userList = document.getElementById("user-list");
+    const userList = document.getElementById("user-list");
 
-  // Cek apakah user sudah login
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      // Jika belum login, redirect ke halaman login.html
-      window.location.href = "/login";
-    } else {
-      // Jika sudah login, jalankan dashboard
-      const usersRef = ref(db, 'users');
+    // Cek apakah user sudah login
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Jika belum login, redirect ke halaman login.html
+        window.location.href = "/login";
+      } else {
+        // Jika sudah login, jalankan dashboard
+        const usersRef = ref(db, 'users');
 
-      onValue(usersRef, (snapshot) => {
-        userList.innerHTML = "";
-        snapshot.forEach(child => {
-          const user = child.val();
-          const key = child.key;
+        document.getElementById("scan-rfid-btn").addEventListener("click", () => {
+          const kode = prompt("Scan atau masukkan kode RFID:");
+          if (!kode) return;
 
-          const kartuStatus = user.kartu && user.kartu.trim() !== ''
-            ? `<span class="badge bg-success">Kartu Terdaftar</span>`
-            : `<span class="badge bg-danger">Belum Ada Kartu</span>`;
+          // Cari user berdasarkan kartu RFID
+          const usersRef = ref(db, 'users');
+          onValue(usersRef, (snapshot) => {
+            let found = false;
+            snapshot.forEach(child => {
+              const user = child.val();
+              if (user.kartu === kode) {
+                found = true;
+                alert(`✅ Kartu terdaftar atas nama: ${user.nama}`);
+              }
+            });
+            if (!found) {
+              alert("❌ Kartu belum terdaftar di sistem.");
+            }
+          }, {
+            onlyOnce: true
+          });
+        });
 
-          const div = document.createElement("div");
-          div.className = "card p-3 mb-2";
-          div.innerHTML = `
+        onValue(usersRef, (snapshot) => {
+          userList.innerHTML = "";
+          snapshot.forEach(child => {
+            const user = child.val();
+            const key = child.key;
+
+            const kartuStatus = user.kartu && user.kartu.trim() !== ''
+              ? `<span class="badge bg-success">Kartu Terdaftar</span>`
+              : `<span class="badge bg-danger">Belum Ada Kartu</span>`;
+
+            const div = document.createElement("div");
+            div.className = "card p-3 mb-2";
+            div.innerHTML = `
             <strong>${user.nama}</strong> ${kartuStatus}<br/>
             Email: ${user.email || '-'}<br/>
             Poin: <input type="number" value="${user.poin || 0}" id="poin-${key}" style="width: 80px;" />
@@ -59,54 +85,59 @@
               <button class="btn btn-secondary btn-sm" onclick="hideAddKartuForm('${key}')">Batal</button>
             </div>
           `;
-          userList.appendChild(div);
-        });
-      });
-
-      // Fungsi global
-      window.updatePoin = function(uid) {
-        const newPoin = parseInt(document.getElementById(`poin-${uid}`).value);
-        update(ref(db, 'users/' + uid), { poin: newPoin });
-      };
-
-      window.hapusUser = function(uid) {
-        if (confirm("Yakin ingin menghapus?")) {
-          remove(ref(db, 'users/' + uid));
-        }
-      };
-
-      window.showAddKartuForm = function(uid, nama) {
-        document.getElementById(`add-kartu-form-${uid}`).style.display = 'block';
-      };
-
-      window.hideAddKartuForm = function(uid) {
-        document.getElementById(`add-kartu-form-${uid}`).style.display = 'none';
-      };
-
-      window.submitKartuRFID = function(uid) {
-        const rfidInput = document.getElementById(`rfid-input-${uid}`);
-        const rfidCode = rfidInput.value.trim();
-
-        if (!rfidCode) {
-          alert("Kode RFID tidak boleh kosong!");
-          return;
-        }
-
-        update(ref(db, 'users/' + uid), { kartu: rfidCode })
-          .then(() => {
-            alert("Kode RFID berhasil disimpan!");
-            rfidInput.value = "";
-            hideAddKartuForm(uid);
-          })
-          .catch((error) => {
-            alert("Gagal menyimpan kode RFID: " + error.message);
+            userList.appendChild(div);
           });
-      };
-    }
-  });
-</script>
+        });
 
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js" integrity="sha384-RuyvpeZCxMJCqVUGFI0Do1mQrods/hhxYlcVfGPOfQtPJh0JCw12tUAZ/Mv10S7D" crossorigin="anonymous"></script>
+        // Fungsi global
+        window.updatePoin = function (uid) {
+          const newPoin = parseInt(document.getElementById(`poin-${uid}`).value);
+          update(ref(db, 'users/' + uid), { poin: newPoin });
+        };
+
+        window.hapusUser = function (uid) {
+          if (confirm("Yakin ingin menghapus?")) {
+            remove(ref(db, 'users/' + uid));
+          }
+        };
+
+        window.showAddKartuForm = function (uid, nama) {
+          document.getElementById(`add-kartu-form-${uid}`).style.display = 'block';
+        };
+
+        window.hideAddKartuForm = function (uid) {
+          document.getElementById(`add-kartu-form-${uid}`).style.display = 'none';
+        };
+
+        window.submitKartuRFID = function (uid) {
+          const rfidInput = document.getElementById(`rfid-input-${uid}`);
+          const rfidCode = rfidInput.value.trim();
+
+          if (!rfidCode) {
+            alert("Kode RFID tidak boleh kosong!");
+            return;
+          }
+
+          update(ref(db, 'users/' + uid), { kartu: rfidCode })
+            .then(() => {
+              alert("Kode RFID berhasil disimpan!");
+              rfidInput.value = "";
+              hideAddKartuForm(uid);
+            })
+            .catch((error) => {
+              alert("Gagal menyimpan kode RFID: " + error.message);
+            });
+        };
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js"
+    integrity="sha384-RuyvpeZCxMJCqVUGFI0Do1mQrods/hhxYlcVfGPOfQtPJh0JCw12tUAZ/Mv10S7D"
+    crossorigin="anonymous"></script>
 </body>
+
 </html>
