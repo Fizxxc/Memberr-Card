@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    },
+        {
+      "src": "/register",
+      "dest": "/register.html"
+    },
+            {
+      "src": "/user",
+      "dest": "/user-dashboard.html"
+    },
+            {
+      "src": "/admin",
+      "dest": "/admin-login.html"
+    },
+            {
+      "src": "/dashboard",
+      "dest": "/admin-dashboard.html"
+    }
+  ]
+}

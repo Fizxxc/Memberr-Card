@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="container py-5">
+    <h2>Dashboard Pengguna</h2>
+    <div id="info" class="mt-4"></div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './firebaseConfig.js';
+    import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+
+    const info = document.getElementById("info");
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        const userRef = ref(db, 'users/' + user.uid);
+        onValue(userRef, snapshot => {
+          const data = snapshot.val();
+          info.innerHTML = `
+            <p><strong>Nama:</strong> ${data.nama}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Alamat:</strong> ${data.alamat}</p>
+            <p><strong>No HP:</strong> ${data.hp}</p>
+            <p><strong>Poin:</strong> ${data.poin}</p>
+            <p><strong>Status Kartu:</strong> ${data.kartu}</p>
+          `;
+        });
+      } else {
+        window.location.href = "/";
+      }
+    });
+  </script>
+</body>
+</html>
