@@ -6,14 +6,24 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid justify-content-end">
+      <button class="btn btn-outline-primary" onclick="modeScanRFID()">🔍 Scan Member dengan RFID</button>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
   <div class="container py-5">
     <h2>Dashboard Admin</h2>
     <div id="user-list" class="mt-4"></div>
   </div>
 
+  <!-- Firebase & Script -->
   <script type="module">
     import { db } from './firebaseConfig.js';
-    import { ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { ref, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
     const userList = document.getElementById("user-list");
     const usersRef = ref(db, 'users');
@@ -79,7 +89,6 @@
         return;
       }
 
-      // Simpan kode RFID ke user di database
       update(ref(db, 'users/' + uid), { kartu: rfidCode })
         .then(() => {
           alert("Kode RFID berhasil disimpan!");
@@ -90,8 +99,31 @@
           alert("Gagal menyimpan kode RFID: " + error.message);
         });
     };
+
+    // 👇 Fitur Scan RFID Otomatis
+    window.modeScanRFID = async function () {
+      alert("Silakan tempelkan kartu ke scanner RFID...");
+
+      const kartuRef = ref(db, 'kartu_terakhir');
+
+      onValue(kartuRef, (snap) => {
+        const rfid = snap.val();
+        if (!rfid) return;
+
+        document.querySelectorAll('[id^="rfid-input-"]').forEach(input => {
+          if (input.offsetParent !== null) {
+            input.value = rfid;
+          }
+        });
+
+        alert("Kartu berhasil discan: " + rfid);
+      }, { onlyOnce: true });
+    };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js" integrity="sha384-RuyvpeZCxMJCqVUGFI0Do1mQrods/hhxYlcVfGPOfQtPJh0JCw12tUAZ/Mv10S7D" crossorigin="anonymous"></script>
+
+  <!-- Bootstrap Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
 </body>
 </html>
