@@ -13,49 +13,29 @@
 
   <script type="module">
     import { auth, db } from './firebaseConfig.js';
-    import { ref, get } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
     const info = document.getElementById("info");
 
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, user => {
       if (user) {
-        const uid = user.uid;
-        const userRef = ref(db, 'users/' + uid);
-
-        try {
-          const snapshot = await get(userRef);
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-
-            info.innerHTML = `
-              <div class="card p-3">
-                <p><strong>Nama:</strong> ${data.nama || '-'}</p>
-                <p><strong>Email:</strong> ${data.email || '-'}</p>
-                <p><strong>Alamat:</strong> ${data.alamat || '-'}</p>
-                <p><strong>No HP:</strong> ${data.hp || '-'}</p>
-                <p><strong>Poin:</strong> ${data.poin ?? 0}</p>
-                <p><strong>Status Kartu:</strong> 
-                  ${data.kartu === "belum" 
-                    ? '<span class="badge bg-danger">Belum Terdaftar</span>' 
-                    : `<span class="badge bg-success">${data.kartu}</span>`}
-                </p>
-              </div>
-            `;
-          } else {
-            info.innerHTML = `<div class="alert alert-warning">Data pengguna belum tersedia.</div>`;
-          }
-        } catch (error) {
-          console.error("Error memuat data:", error);
-          info.innerHTML = `<div class="alert alert-danger">Terjadi kesalahan saat mengambil data pengguna.</div>`;
-        }
+        const userRef = ref(db, 'users/' + user.uid);
+        onValue(userRef, snapshot => {
+          const data = snapshot.val();
+          info.innerHTML = `
+            <p><strong>Nama:</strong> ${data.nama}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Alamat:</strong> ${data.alamat}</p>
+            <p><strong>No HP:</strong> ${data.hp}</p>
+            <p><strong>Poin:</strong> ${data.poin}</p>
+            <p><strong>Status Kartu:</strong> ${data.kartu}</p>
+          `;
+        });
       } else {
-        window.location.href = "/";
+        window.location.href = "index.html";
       }
     });
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
 </body>
 </html>
