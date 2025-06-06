@@ -35,15 +35,19 @@
                 <p><strong>Alamat:</strong> ${data.alamat || '-'}</p>
                 <p><strong>No HP:</strong> ${data.hp || '-'}</p>
                 <p><strong>Poin:</strong> ${data.poin ?? 0}</p>
-                <p><strong>Status Kartu:</strong> ${data.kartu ? `<span class="badge bg-success">${data.kartu}</span>` : '<span class="badge bg-danger">Belum terdaftar</span>'}</p>
+                <p><strong>Status Kartu:</strong> 
+                  ${data.kartu === "belum" 
+                    ? '<span class="badge bg-danger">Belum Terdaftar</span>' 
+                    : `<span class="badge bg-success">${data.kartu}</span>`}
+                </p>
               </div>
             `;
           } else {
-            info.innerHTML = `<div class="alert alert-warning">Data pengguna tidak ditemukan di database.</div>`;
+            info.innerHTML = `<div class="alert alert-warning">Data pengguna belum tersedia.</div>`;
           }
         } catch (error) {
-          console.error("Error loading user data:", error);
-          info.innerHTML = `<div class="alert alert-danger">Gagal memuat data pengguna.</div>`;
+          console.error("Error memuat data:", error);
+          info.innerHTML = `<div class="alert alert-danger">Terjadi kesalahan saat mengambil data pengguna.</div>`;
         }
       } else {
         window.location.href = "/";
