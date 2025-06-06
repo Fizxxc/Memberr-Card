@@ -1,29 +1,10 @@
 {
-  "version": 2,
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
-    },
-    {
-      "src": "/register",
-      "dest": "/public/register.html"
-    },
-    {
-      "src": "/user",
-      "dest": "/public/user-dashboard.html"
-    },
-    {
-      "src": "/admin",
-      "dest": "/public/admin-login.html"
-    },
-    {
-      "src": "/dashboard",
-      "dest": "/public/admin-dashboard.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
-    }
+    { "src": "/api/login", "dest": "/api/login.js" },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/dashboard", "dest": "/admin-dashboard.html" },
+    { "src": "/user", "dest": "/user-dashboard.html" },
+    { "src": "/admin", "dest": "/admin-dashboard.html" },
+    { "src": "/register", "dest": "/user-register.js" }
   ]
 }
