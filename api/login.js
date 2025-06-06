@@ -1,21 +1,24 @@
-export const config = {
-  runtime: 'edge',
-};
+export default async function handler(req, res) {
+  try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
 
-export default function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ success: false, message: "Metode tidak diizinkan" });
-  }
+    const { usrname, password } = req.body;
 
-  const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Missing credentials' });
+    }
 
-  // Ganti kredensial admin di sini
-  const ADMIN_USER = "Fizzx";
-  const ADMIN_PASS = "Fizzx1321";
+    // Validasi akun admin (contoh sederhana)
+    if (username === "Fizzx" && password === "Fizzx1321") {
+      return res.status(200).json({ success: true });
+    } else {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    return res.status(200).json({ success: true });
-  } else {
-    return res.status(401).json({ success: false, message: "Username atau password salah" });
+  } catch (err) {
+    console.error("Login API error:", err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
