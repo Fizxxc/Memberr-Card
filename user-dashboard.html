@@ -13,31 +13,45 @@
 
   <script type="module">
     import { auth, db } from './firebaseConfig.js';
-    import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { ref, get } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
     const info = document.getElementById("info");
 
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userRef = ref(db, 'users/' + user.uid);
-        onValue(userRef, snapshot => {
-          const data = snapshot.val();
-          info.innerHTML = `
-            <p><strong>Nama:</strong> ${data.nama}</p>
-            <p><strong>Email:</strong> ${data.email}</p>
-            <p><strong>Alamat:</strong> ${data.alamat}</p>
-            <p><strong>No HP:</strong> ${data.hp}</p>
-            <p><strong>Poin:</strong> ${data.poin}</p>
-            <p><strong>Status Kartu:</strong> ${data.kartu}</p>
-          `;
-        });
+        const uid = user.uid;
+        const userRef = ref(db, 'users/' + uid);
+
+        try {
+          const snapshot = await get(userRef);
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+
+            info.innerHTML = `
+              <div class="card p-3">
+                <p><strong>Nama:</strong> ${data.nama || '-'}</p>
+                <p><strong>Email:</strong> ${data.email || '-'}</p>
+                <p><strong>Alamat:</strong> ${data.alamat || '-'}</p>
+                <p><strong>No HP:</strong> ${data.hp || '-'}</p>
+                <p><strong>Poin:</strong> ${data.poin ?? 0}</p>
+                <p><strong>Status Kartu:</strong> ${data.kartu ? `<span class="badge bg-success">${data.kartu}</span>` : '<span class="badge bg-danger">Belum terdaftar</span>'}</p>
+              </div>
+            `;
+          } else {
+            info.innerHTML = `<div class="alert alert-warning">Data pengguna tidak ditemukan di database.</div>`;
+          }
+        } catch (error) {
+          console.error("Error loading user data:", error);
+          info.innerHTML = `<div class="alert alert-danger">Gagal memuat data pengguna.</div>`;
+        }
       } else {
         window.location.href = "/";
       }
     });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js" integrity="sha384-RuyvpeZCxMJCqVUGFI0Do1mQrods/hhxYlcVfGPOfQtPJh0JCw12tUAZ/Mv10S7D" crossorigin="anonymous"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
 </body>
 </html>
