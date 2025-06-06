@@ -5,15 +5,15 @@ import { getDatabase } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDpv9uvfdUPKnyBKESB2fDEUwuDn9Nzmtg",
-  authDomain: "orderr-625c2.firebaseapp.com",
-  databaseURL: "https://orderr-625c2-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "orderr-625c2",
-  storageBucket: "orderr-625c2.appspot.com",
-  messagingSenderId: "891679772111",
-  appId: "1:891679772111:web:1b5999b967bd17c87356ba",
-  measurementId: "G-06W3BTP7HH"
-};
+    apiKey: "AIzaSyBlNHkA1f-1GwBN0nBchMtIwEYUNLlq8FQ",
+    authDomain: "e-commerce-a6fe2.firebaseapp.com",
+    databaseURL: "https://e-commerce-a6fe2-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "e-commerce-a6fe2",
+    storageBucket: "e-commerce-a6fe2.firebasestorage.app",
+    messagingSenderId: "169688929056",
+    appId: "1:169688929056:web:8d04f0b02c98fa77d1bd45",
+    measurementId: "G-Q8FP7FQQHV"
+  };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
