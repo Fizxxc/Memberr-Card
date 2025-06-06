@@ -4,7 +4,7 @@
     { "src": "/", "dest": "/index.html" },
     { "src": "/dashboard", "dest": "/admin-dashboard.html" },
     { "src": "/user", "dest": "/user-dashboard.html" },
-    { "src": "/admin", "dest": "/admin-dashboard.html" },
+    { "src": "/admin", "dest": "/admin-login.html" },
     { "src": "/register", "dest": "/register.html" }
   ]
 }
